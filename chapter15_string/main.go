@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
+	"unsafe"
 )
 
 func main() {
@@ -97,5 +100,79 @@ func main() {
 
 	// ===============================================================
 	// 문자열 합치기
+	str1 := "Hello "
+	str2 := "world!"
+	if str1+str2 == "Hello world!" {
+		fmt.Println("They are same strings")
+	}
+	// strings.Join([]string, delimeter) 사용으로 문자열을 이어붙일 수 있다.
+	strArray := []string{str1, str2}
+	myString = strings.Join(strArray, "")
 
+	// 그 외 문자열 동일비교 및 문자열 대소비교도 가능하다.
+	// 동일비교 : ==, !=
+	// 대소비교 : <, >, >=, <= 로 앞에서부터 한 글자씩 UTF-8의 값을 비교한다.
+
+	valorigin := "Xi story"
+	valcopy := valorigin
+
+	stringHeader1 := (*reflect.StringHeader)(unsafe.Pointer(&valorigin))
+	stringHeader2 := (*reflect.StringHeader)(unsafe.Pointer(&valcopy))
+
+	fmt.Println(stringHeader1)
+	fmt.Println(stringHeader2)
+	// 결론은, 문자열을 복사한다고해서 문자열 변수가 가리키는 문자열 데이터가 복사되는 것이 아니라,
+	// 16바이트 값만 복사될 뿐 문자열 데이터는 복사되지 않는다.
+
+	// 아래 StringHeader 구조체가 곧 String 타입의 구조이며, string 복사는 이 구조체의 복사와 같으므로, 16바이트 값에 대한 복사만 이루어진다.
+	// type StringHeader struct {
+	// 	   Data uintptr // 8 byte
+	// 	   Len  int     // 8 byte (64-bit pc)
+	// }
+
+	// ===============================================================
+	// 문자열은 불변이다? No. 전체변경은 가능하지만 일부 변경은 불가하다.
+	// 문자열을 이루는 문자 일부만 변경할 수 없다는 뜻이다.
+	var str string = "Hello world"
+	//str[2] = 'a' -> 일부만 변경할 수 없다.
+
+	// []byte <-> string 을 통한 일부 변경가능?
+	byteArray := []byte(str)
+
+	strH1 := (*reflect.StringHeader)(unsafe.Pointer(&str))
+	strH2 := (*reflect.StringHeader)(unsafe.Pointer(&byteArray))
+
+	fmt.Printf("origin string : \t%x\n", strH1.Data)
+	fmt.Printf("copied slice of byte : \t%x\n", strH2.Data)
+	// 두 변수 str, byteArray 가 가리키는 주소가 다르다. 따라서, byteArray의 일부 데이터를 바꾸더라도 str 의 문자열값에 영향을주지 않는다.
+
+	// ===============================================================
+	// 문자열 합산
+	StringAdd := "A"
+	stringHead := (*reflect.StringHeader)(unsafe.Pointer(&StringAdd))
+	fmt.Printf("0 Added string's address: %x\n", stringHead.Data)
+
+	StringAdd += " B"
+	fmt.Printf("0 Added string's address: %x\n", stringHead.Data)
+
+	// Go 언어는 기존 문자열 공간을 건드리지 않고, 새로운 메모리 공간을 만들어서 두 문자열을 합치기 때문에, string 합 연산 이후 주소값이 변경된다.
+	// 따라서 문자열 불변 원칙이 준수된다. 하지만 string 합 연산을 빈번하게 하면 메모리가 낭비되기 때문에, strings 패키지의 Builder를 이용해서 메모리 낭비를 줄일 수 있다.
+
+	// 아래 AggregateRune 메소드를 통해 메모리 낭비를 줄일 수 있다.
+	myStringBuilder := "abcde"
+	fmt.Println("origin string: ", myStringBuilder)
+	fmt.Println("aggregated string : ", AggregateRune(myStringBuilder))
+}
+
+func AggregateRune(myString string) string {
+	var builder strings.Builder
+	for _, val := range myString {
+		if val >= 'a' && val <= 'z' {
+			// string += "a" 같은 것 대신 아래와 같이 builder 를 활용한다.
+			builder.WriteRune('A' + (val - 'a'))
+		} else {
+			builder.WriteRune(val)
+		}
+	}
+	return builder.String()
 }
