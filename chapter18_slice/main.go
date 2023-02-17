@@ -90,7 +90,38 @@ func main() {
 	// myArray 를 함수에 넘기면 값의 복사가 일어나서 원래 배열과 별도의 배열이 생성되며 값이 복사되고, 변경되는 것은 복사된 배열이므로, 기존 배열의 값에 영향을 미치지 않는다.
 
 	// 반면, 슬라이스의 구조를 떠올려보자. 3개 필드로 구성된 구조체인 슬라이스는 함수호출 시 동일한 Data, len, cap 을 갖는 객체가 생성되고,
-	// 복사된 슬라이스 구조체의 Data 는 기존 슬라이스의 Data 가 가리키는 배열과 동일한 것을 가리킨다. 따라서, 함수 내에서 요소를 변경하는 경우 원본 슬라이스가 가리키는 배열의 값을 변경하는것과 동일하기 때문에, 슬라이스만 값이 변경되었다.
+	// 복사된 슬라이스 구조체의 Data 는 기존 슬라이스의 Data 가 가리키는 배열과 동일한 것을 가리킨다. 따라서, 함수 내에서 요소를 변경하는 경우 원본 슬라이스가 가리키는 배열의 값을 변경하는것과 동일하기 때문에, 슬라이스만 값이 변경되었다.₩₩₩₩₩₩₩₩₩₩₩₩₩₩₩₩
+
+	// /////////////////// append() 를 사용했을 때 예상치 못한 문제 1 //////////////////////////
+	// -> 같은 배열을 가리키더라도, slice 마다 len이 다를 수 있고, 같은 배열을 가리키더라도 데이터 접근이 불가할 수 있다.
+	mySlice7 := make([]int, 3, 5)      // len : 3 , cap : 5
+	mySlice8 := append(mySlice7, 4, 5) // mySlice7 : len,cap : 3,5 / mySlice8 : len,cap : 5,5
+
+	fmt.Println(len(mySlice7), cap(mySlice7), mySlice7) // 3 5 [0 0 0]
+	fmt.Println(len(mySlice8), cap(mySlice8), mySlice8) // 5 5 [0 0 0 4 5]
+	// 같은 배열을 가지고 있지만, 슬라이스 구조체가 갖는 각 필드가 상이해서 가리키는 배열은 같지만, 데이터 접근에 차이가 발생한다.
+	// fmt.Println(mySlice7[3]) len:3인 슬라이스에 네 번째 요소를 접근하려고하면 에러발생한다.
+
+	mySlice7 = append(mySlice7, 100)
+	fmt.Println(len(mySlice7), cap(mySlice7), mySlice7) // 4 5 [0 0 0 100]
+	fmt.Println(len(mySlice8), cap(mySlice8), mySlice8) // 5 5 [0 0 0 100 5]
+	// mySlice7의 뒤에 100을 추가하면 같은 배열을 가리키고 있던 slice8의 값도 바뀐다.
+	// mySlice7의 len 은 1증가한다.
+
+	// /////////////////// append() 를 사용했을 때 예상치 못한 문제 2 ///////////////////////
+	// cap을 넘어서는 append 를 했을 때 기존 배열이 아닌 새로운 배열을 가리키게 된다.
+	slice9 := []int{1, 2, 3}
+	slice10 := append(slice9, 4, 5)
+	fmt.Println(len(slice9), cap(slice9), slice9)    // 3 3 [1 2 3]
+	fmt.Println(len(slice10), cap(slice10), slice10) // 5 6 [1 2 3 4 5]
+
+	// slice9, slice10 가 서로 다른 배열을 가리키는지 [1]을 바꿔보자.
+	slice9[1] = 999
+	fmt.Println(len(slice9), cap(slice9), slice9)    // 4 5 [1 999 3]
+	fmt.Println(len(slice10), cap(slice10), slice10) // 5 5 [1 2 3 4 5]
+	// slice9만 값이 바뀐것을 보아 서로 다른 배열을 바라보고 있는 것을 확인했다.
+
+	//////////////////////////////////// 슬라이싱 /////////////////////////
 
 }
 
