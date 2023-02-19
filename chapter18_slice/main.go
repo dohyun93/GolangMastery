@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
 	// 이번 시간에는 go 언어에서 제공하는 '동적 배열'인 슬라이스를 정복해본다.
@@ -142,8 +145,80 @@ func main() {
 
 	//////////////////// cap 크기 조절하기 ////////////////////////
 	// 인덱스 3개로 슬라이싱해서 cap 크기 조절할 수 있다. !!
+	slice14 := []int{1, 2, 3, 4, 5}
+	slice15 := slice14[1:2:3]                        // [2], len : 1, cap : 최대인덱스(3)-시작인덱스(1) = 2.
+	fmt.Println(slice14, len(slice14), cap(slice14)) // [1 2 3 4 5] 5 5
+	fmt.Println(slice15, len(slice15), cap(slice15)) // [2] 1 2
 
+	//////////////////// slice 유용한 기능 ////////////////////////
+	// 1. 슬라이스 복제
+	slice16 := []int{1, 2, 3, 4, 5}
+	slice17 := append([]int{}, slice16...) // 배열이나 슬라이스 뒤에 ...를 넣어주면 '모든 요소값'을 넣어준 것과 동일하다.
+	// 즉, 이는 slice17 := append([]int{}, slice16[0], slice16[1], ..., slice16[4]) 와 같다.
+
+	// append 말고, copy() 를 사용해도 슬라이스 복제가 가능하다.
+	// func copy (dst, src []Type) int -> 반환값은 실제로 복사된 요소개수다.
+	slice17 = []int{1, 2, 3, 4, 5}
+	slice18 := make([]int, 3, 10) // len: 3, cap : 10
+	slice19 := make([]int, 10)    // len: 10, cap: 10
+
+	copied_cnt1 := copy(slice18, slice17)
+	copied_cnt2 := copy(slice19, slice17)
+
+	fmt.Println(copied_cnt1, slice18, len(slice18), cap(slice18)) // 3 [1 2 3] 3 10 -> 5개 담기지 않고, len 만큼 담긴다. (cap은 변하지 않는다.)
+	fmt.Println(copied_cnt2, slice19, len(slice19), cap(slice19)) // 5 [1 2 3 4 5 0 0 0 0 0] 10 10
+
+	// 따라서, copy 를 사용해서 값을 모두 다 복사하려면 아래처럼 할 수 있다.
+	slice20 := make([]int, len(slice17))             // (1)복사할 대상의 길이만큼 만들고,
+	copy(slice20, slice17)                           // (2) 복사한다.
+	fmt.Println(slice20, len(slice20), cap(slice20)) // [1 2 3 4 5] 5 5
+
+	/////////////////////////////////////////////////////////
+	// 2. 슬라이스 요소 삭제
+	slice21 := []int{1, 2, 3, 4, 5}
+	delIdx := 2
+	slice22 := append(slice21[:delIdx], slice21[delIdx+1:]...)
+	fmt.Println(slice22, len(slice22), cap(slice22)) // [1 2 4 5] 4 5
+
+	// 3. 슬라이스 요소 추가
+	slice23 := []int{1, 2, 3, 4, 5, 6, 7}
+	slice23 = append(slice23, 0)
+	idxInsert := 2
+	copy(slice23[idxInsert+1:], slice23[idxInsert:]) // slice23[idxInsert+1] 기준으로 넣기 때문에 5회 넣어진다.
+	slice23[idxInsert] = 100
+
+	fmt.Println(slice23, len(slice23), cap(slice23)) // [1 2 100 3 4 5 6 7] 8 14
+
+	///////////////////////////////////////////////////////////
+	// 4. slice 정렬 - int 슬라이스
+	s := []int{5, 2, 6, 3, 1, 4}
+	sort.Ints(s) // Int sort 의 약자인듯. Float64s 같은 함수도 있음.
+	fmt.Println(s)
+
+	// slice 정렬 - 구조체 슬라이스
+	// Len(), Less(), swap() 메서드가 필요하다.
+	students := Students{
+		{"도현", 31},
+		{"가령", 31},
+		{"피그", 29},
+	}
+	sort.Sort(students)
+	// Less() 메서드로 각 요소의 Age 값을 비교한다.
+	// 아래 메서드들의 리스너인 Students 타입은 Len, Less, Swap 메서드를 가지고 있지 않기 때문에,
+	// sort.Sort 의 인수로 사용될 수 없다. 따라서 아래 메서드들을 '구현'해서 커스텀 구조체 타입도 sort.Sort 를 통해 정렬될 수 있도록 개발한 것이다.
+	fmt.Println(students)
 }
+
+type Student struct {
+	Name string
+	Age  int
+}
+
+type Students []Student
+
+func (s Students) Len() int           { return len(s) }              // Len() : Student 슬라이스 길이 반환 메서드.
+func (s Students) Less(i, j int) bool { return s[i].Age < s[j].Age } // Less() : Student 각 객체의 나이 비교.
+func (s Students) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 func changeArray(myArray [5]int) {
 	myArray[2] = 100
