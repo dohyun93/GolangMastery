@@ -122,6 +122,26 @@ func main() {
 	// slice9만 값이 바뀐것을 보아 서로 다른 배열을 바라보고 있는 것을 확인했다.
 
 	//////////////////////////////////// 슬라이싱 /////////////////////////
+	// slice를 배열의 슬라이싱 결과로 만든다면 cap 은 어떻게 될까?
+	array10 := [5]int{1, 2, 3, 4, 5}
+	slice11 := array10[1:2]
+	fmt.Println(array10, len(array10))               // [1 2 3 4 5] 5
+	fmt.Println(slice11, len(slice11), cap(slice11)) // cap 은 [1]부터 끝까지 배열의 크기로 정해지므로, [1]~[4] 총 4가 cap이 된다. [2] 1 4
+	// Data 포인터는 array10[1] 을 가리킨다.
+	// 따라서, array10[1] = 999 로 바꾸면, slice11 도 바뀐다.
+	array10[1] = 999
+	fmt.Println(array10, len(array10))               // [1 999 3 4 5] 5
+	fmt.Println(slice11, len(slice11), cap(slice11)) // [999] 1 4
+
+	// 슬라이싱은 배열뿐 아니라 슬라이스도 할 수 있다.
+	slice12 := []int{1, 2, 3, 4, 5}
+	slice13 := slice12[1:2]
+	fmt.Println(slice12, len(slice12), cap(slice12)) // [1 2 3 4 5] 5 5
+	fmt.Println(slice13, len(slice13), cap(slice13)) // [2] 1 4
+	// slice13 은 slice12[1] 을 가리키는 포인터를 구조체 필드로 갖는다.
+
+	//////////////////// cap 크기 조절하기 ////////////////////////
+	// 인덱스 3개로 슬라이싱해서 cap 크기 조절할 수 있다. !!
 
 }
 
