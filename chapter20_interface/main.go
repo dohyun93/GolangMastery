@@ -22,4 +22,9 @@ type DuckInterface interface {
 	// 인터페이스 밑에 메서드들을 넣을 수 있다.
 	Fly()
 	Walk(distance int) int
+	// _(x int) -> 메서드는 반드시 이름이 있어야 한다.
+}
+
+type Stringer interface {
+	String() string
 }
