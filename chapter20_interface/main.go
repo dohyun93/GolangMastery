@@ -13,10 +13,16 @@ func main() {
 	var stringer Stringer
 	// 2-3. String() string 메서드를 포함하는 인터페이스에 String() string 메서드를 포함하고 있는 인스턴스를 대입할 수 있다.
 	stringer = student
+	//fmt.Println(student)
 
 	fmt.Printf("%s\n", stringer.String())
 
 	// [핵심] - 인터페이스의 메서드를 포함하는 타입은 인터페이스에 할당될 수 있다.
+	/// 그럼, 인터페이스는 왜  쓸까 ????
+
+	// 구체화된 객체가 아닌 인터페이스만 가지고 메서드를 호출할 수  있기 때문이다. -> 큰 코드 수정이 필요 없다.
+
+	//
 }
 
 /////////////// 1. 인터페이스 선언은 아래처럼 할 수 있다.
