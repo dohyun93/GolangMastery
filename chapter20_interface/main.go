@@ -65,4 +65,7 @@ type Student struct {
 
 func (s Student) String() string {
 	return fmt.Sprintf("안녕, 나는 %d 살 %s 라고 해 \n", s.Age, s.Name)
+	fmt.Println()
 }
+
+//ㅎㅎ하
