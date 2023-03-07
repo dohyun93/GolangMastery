@@ -17,4 +17,5 @@ func Sum(nums ...int) int {
 func main() {
 	fmt.Println(Sum(1, 2, 3, 4, 5))
 	fmt.Println(Sum(100, 200))
+	fmt.Println(Sum(10, 20, 30, 40))
 }
