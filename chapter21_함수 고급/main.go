@@ -21,8 +21,12 @@ func Print(args ...interface{}) {
 	for _, val := range args {
 		switch T := val.(type) {
 		case bool:
-			value := val.(bool)
-			fmt.Println("boolean data print!: ", value)
+			value, ok := val.(int)
+			if ok {
+				fmt.Println("case condition was bool but can be asserted as int!: ", value)
+			} else {
+				fmt.Println("You cannot assert this interface's value into int for the bool condition.")
+			}
 		case int64:
 			value := val.(int64)
 			fmt.Println("int64 data print!: ", value)
